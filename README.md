@@ -2,7 +2,7 @@
 
 `korkutWhisper` is a local **CTranslate2 / faster-whisper** speech-to-text inference library implementing **decoder-guided selective re-inference (`g2`)** for short-form audio (`<= 1500` Mel content frames, ~15 seconds).
 
-Instead of unconditionally encoding every short audio clip with Whisper's full 30-second (`3000`-frame) encoder context, `korkutWhisper` first runs a fast **Stage 1 (`1500`-frame)** pass, evaluates a calibrated **Decoder-Based Quality Gate (`decoder_based_b2`)** over decoder output statistics (`avg_logprob` and `compression_ratio`), and selectively triggers a **Stage 2 (`3000`-frame)** re-inference pass **only** when the computed risk score meets or exceeds the decision threshold—reusing the already extracted log-Mel spectrogram without re-decoding the audio.
+Instead of unconditionally encoding every short audio clip with Whisper's full 30-second (`3000`-frame) encoder context, `korkutWhisper` first runs a fast **Stage 1 (`1500`-frame)** pass, evaluates a development-fitted **Decoder-Based Quality Gate (`decoder_based_b2`)** over decoder output statistics (`avg_logprob` and `compression_ratio`), and selectively triggers a **Stage 2 (`3000`-frame)** re-inference pass **only** when the computed risk score meets or exceeds the decision threshold—reusing the already extracted log-Mel spectrogram without re-decoding the audio.
 
 ---
 
@@ -21,7 +21,11 @@ As illustrated in the system diagram above, every transcription request under th
    - The cached Mel spectrogram is zero-padded to exactly `1500` frames and passed through the CTranslate2 Whisper encoder and decoder using a deterministic seed derived from `seed|audio_id|1500`.
 4. **Decoder-Based Quality Gate (`decoder_based_b2`):**
    - The gate extracts the segment-level mean `avg_logprob` and `compression_ratio` from Stage 1 (imputing missing/non-finite values with calibration medians if needed) and computes a linear risk score using the SHA-256 verified parameters in [`src/korkutwhisper/profiles/decoder_based_b2.json`](src/korkutwhisper/profiles/decoder_based_b2.json):
-     $$\text{risk\_score} = w_{\text{lp}} \cdot \frac{\text{logprob} - \mu_{\text{lp}}}{\sigma_{\text{lp}}} + w_{\text{cr}} \cdot \frac{\text{compression} - \mu_{\text{cr}}}{\sigma_{\text{cr}}}$$
+
+     ```math
+     \text{risk}_{\text{score}} = w_{\text{lp}} \cdot \frac{\text{logprob} - \mu_{\text{lp}}}{\sigma_{\text{lp}}} + w_{\text{cr}} \cdot \frac{\text{compression} - \mu_{\text{cr}}}{\sigma_{\text{cr}}}
+     ```
+
    - Note: `risk_score` is a linear decision metric, **not** a calibrated probability.
 5. **Quality Acceptable? (`risk_score < threshold` vs. `risk_score >= threshold`):**
    - **Yes (`risk_score < 0.07826304331214909`):** Stage 1 transcript is accepted immediately (`final_stage = 1`, `retry_performed = False`), saving the cost of a 3000-frame pass.
