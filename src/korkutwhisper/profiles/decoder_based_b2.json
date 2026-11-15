@@ -1,0 +1,14 @@
+{
+  "profile": "decoder_based_b2",
+  "logprob_weight": -0.11143469276570268,
+  "compression_weight": 0.03922713673281132,
+  "logprob_mean": -0.06624447784135314,
+  "compression_mean": 0.9736811585730087,
+  "logprob_std": 0.06116229410922396,
+  "compression_std": 0.11310338885374968,
+  "logprob_median": -0.04859209232605421,
+  "compression_median": 0.975609756097561,
+  "threshold": 0.07826304331214909,
+  "decision": "risk_score >= threshold",
+  "score_is_probability": false
+}
