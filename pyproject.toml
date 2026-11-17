@@ -10,6 +10,12 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24", "scipy>=1.10", "av>=11", "faster-whisper==1.2.1", "ctranslate2>=4.0"]
 
+[project.urls]
+Homepage = "https://github.com/Eminkorkut/korkutWhisper"
+Repository = "https://github.com/Eminkorkut/korkutWhisper"
+Issues = "https://github.com/Eminkorkut/korkutWhisper/issues"
+PyPI = "https://pypi.org/project/korkutwhisper/"
+
 [project.scripts]
 korkutwhisper = "korkutwhisper.cli:main"
 
